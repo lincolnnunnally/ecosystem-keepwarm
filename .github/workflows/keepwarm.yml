@@ -1,0 +1,26 @@
+name: keep-warm
+# Pings the free-tier Render backends so real users never hit a ~50s cold start.
+# Free (public repo = unlimited Actions). Reversible: delete this repo/workflow.
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every ~10 min (UTC, best-effort); Render spins down at 15 min idle
+  workflow_dispatch:          # allow manual run for verification
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake the backends
+        run: |
+          set +e
+          urls=(
+            "https://easy-peazy-api.onrender.com/api/health"
+            "https://laser-engrave-api.onrender.com/api/health"
+            "https://kindred-api-5d9v.onrender.com/api/health"
+            "https://aligned-souls-api.onrender.com/api/health"
+            "https://api.churchconnect.cloud/api/health"
+          )
+          for u in "${urls[@]}"; do
+            code=$(curl -s -m 90 -o /dev/null -w "%{http_code}" "$u")
+            echo "$u -> $code"
+          done
+          echo "keep-warm ping complete"
