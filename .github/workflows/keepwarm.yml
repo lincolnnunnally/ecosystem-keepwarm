@@ -13,7 +13,6 @@ jobs:
         run: |
           set +e
           urls=(
-            "https://easy-peazy-api.onrender.com/api/health"
             "https://laser-engrave-api.onrender.com/api/health"
             "https://kindred-api-5d9v.onrender.com/api/health"
             "https://aligned-souls-api.onrender.com/api/health"
