@@ -5,7 +5,22 @@ on:
   schedule:
     - cron: '*/10 * * * *'   # every ~10 min (UTC, best-effort); Render spins down at 15 min idle
   workflow_dispatch:          # allow manual run for verification
+# GitHub switches off scheduled workflows in public repos after 60 days with no
+# commits (this happened 2026-09-09: pings silently stopped for ~2 months).
+# The stay-enabled job re-enables this workflow via the API, which resets that
+# 60-day clock. actions: write is needed for that call; nothing else is granted.
+permissions:
+  actions: write
+  contents: read
 jobs:
+  stay-enabled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-enable this workflow (resets GitHub's 60-day inactivity timer)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/keepwarm.yml/enable" && echo "re-enabled"
+
   ping:
     runs-on: ubuntu-latest
     steps:
